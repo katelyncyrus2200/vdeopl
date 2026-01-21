@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
+    <!-- Video surface -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
@@ -13,15 +14,19 @@
         app:use_controller="false"
         app:animation_enabled="false" />
 
+    <!-- Bottom controls (hidden by default) -->
     <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_gravity="bottom"
         android:background="#CC000000"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:visibility="gone">
 
+        <!-- Back 15 sec -->
         <ImageButton
             android:id="@+id/btnBack15"
             android:layout_width="48dp"
@@ -29,6 +34,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_rew_15" />
 
+        <!-- Play / Pause -->
         <ImageButton
             android:id="@+id/btnPlayPause"
             android:layout_width="56dp"
@@ -36,6 +42,7 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_play" />
 
+        <!-- Forward 15 sec -->
         <ImageButton
             android:id="@+id/btnFwd15"
             android:layout_width="48dp"
@@ -43,8 +50,13 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_fwd_15" />
 
-        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
+        <!-- Subtitles -->
         <ImageButton
             android:id="@+id/btnSubtitles"
             android:layout_width="48dp"
@@ -52,12 +64,14 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_cc" />
 
+        <!-- Audio -->
         <ImageButton
             android:id="@+id/btnAudio"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_audio" />
+
     </LinearLayout>
 
 </FrameLayout>
