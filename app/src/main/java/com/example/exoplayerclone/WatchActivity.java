@@ -42,10 +42,16 @@ public class WatchActivity extends AppCompatActivity {
 
         playerView = findViewById(R.id.player_view);
 
+        // Same immersive flags used in the original (0x1307)
         playerView.setSystemUiVisibility(0x1307);
+
+        // Re-apply immersive when controller hides
         playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
-            @Override public void onVisibilityChanged(int visibility) {
-                if (visibility == View.GONE) playerView.setSystemUiVisibility(0x1307);
+            @Override
+            public void onVisibilityChanged(int visibility) {
+                if (visibility == View.GONE) {
+                    playerView.setSystemUiVisibility(0x1307);
+                }
             }
         });
 
@@ -53,12 +59,13 @@ public class WatchActivity extends AppCompatActivity {
             pickerShown = savedInstanceState.getBoolean("pickerShown", false);
         }
 
-        initPlayer();
+        initPlayerIfNeeded();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        initPlayerIfNeeded();
 
         if (!pickerShown) {
             pickerShown = true;
@@ -66,12 +73,19 @@ public class WatchActivity extends AppCompatActivity {
         }
     }
 
-    private void initPlayer() {
-        player = new ExoPlayer.Builder(this).build();
+    private void initPlayerIfNeeded() {
+        if (player != null) return;
+
+        player = new ExoPlayer.Builder(this)
+                .setSeekForwardIncrementMs(10_000)
+                .setSeekBackIncrementMs(10_000)
+                .build();
+
         playerView.setPlayer(player);
     }
 
     private void playUri(Uri uri) {
+        if (player == null) initPlayerIfNeeded();
         MediaItem item = new MediaItem.Builder().setUri(uri).build();
         player.setMediaItem(item);
         player.prepare();
