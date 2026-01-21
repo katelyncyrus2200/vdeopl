@@ -26,9 +26,14 @@ public class WatchActivity extends AppCompatActivity {
         // Immersive flags similar to the reference app
         playerView.setSystemUiVisibility(0x1307);
 
-        playerView.setControllerVisibilityListener(visibility -> {
-            if (visibility == View.GONE) {
-                playerView.setSystemUiVisibility(0x1307);
+        playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
+            @Override
+            public void onVisibilityChanged(int visibility) {
+                if (visibility == View.GONE) {
+                    playerView.setSystemUiVisibility(0x1307);
+                }
+            }
+        });
             }
         });
 
