@@ -3,17 +3,16 @@
     package="com.example.exoplayerclone">
 
     <application
-        android:label="ExoPlayer Picker"
-        android:theme="@style/Theme.ExoPlayerPicker">
+        android:label="ExoPlayer Auto Picker"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
             android:name=".WatchActivity"
             android:exported="true"
             android:screenOrientation="sensorLandscape">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
