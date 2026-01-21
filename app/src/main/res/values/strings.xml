@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rewind_5s">Rewind 5 seconds</string>
-    <string name="forward_5s">Forward 5 seconds</string>
-    <string name="play_pause">Play/Pause</string>
-    <string name="stop">Stop</string>
+    <string name="exo_controls_previous_description">Previous</string>
+    <string name="exo_controls_rewind_description">Rewind</string>
+    <string name="exo_controls_fastforward_description">Fast forward</string>
+    <string name="exo_controls_play_pause_description">Play/Pause</string>
+    <string name="exo_controls_aspect_ratio_description">Aspect ratio</string>
+    <string name="exo_controls_subtitle_description">Subtitles</string>
+    <string name="exo_controls_audio_description">Audio</string>
 </resources>
