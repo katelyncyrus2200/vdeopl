@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rewind_5s">Rewind 5 seconds</string>
+    <string name="forward_5s">Forward 5 seconds</string>
+    <string name="play_pause">Play/Pause</string>
+    <string name="stop">Stop</string>
+</resources>
