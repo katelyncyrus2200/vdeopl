@@ -11,16 +11,22 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:padding="8dp">
 
         <ImageButton
             android:id="@+id/exo_aspect_ratio"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?android:selectableItemBackground"
-            android:src="@drawable/ic_aspect_ratio_white_24dp"
-            android:contentDescription="Aspect Ratio" />
+            android:src="@drawable/ic_aspect_ratio_white_24dp" />
+
+        <ImageButton
+            android:id="@+id/btn_open_video"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:selectableItemBackground"
+            android:src="@android:drawable/ic_menu_upload" />
+
     </LinearLayout>
 
 </LinearLayout>

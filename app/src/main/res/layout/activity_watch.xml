@@ -10,9 +10,7 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:animation_enabled="false"
         app:auto_show="false"
-        app:controller_layout_id="@layout/exo_playback_control_view"
-        app:show_subtitle_button="true" />
+        app:controller_layout_id="@layout/exo_playback_control_view"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

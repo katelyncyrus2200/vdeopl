@@ -3,8 +3,8 @@
     package="com.example.exoplayerclone">
 
     <application
-        android:label="ExoPlayer Clone"
-        android:theme="@style/Theme.ExoPlayerClone">
+        android:label="ExoPlayer Picker"
+        android:theme="@style/Theme.ExoPlayerPicker">
         <activity
             android:name=".WatchActivity"
             android:exported="true"
