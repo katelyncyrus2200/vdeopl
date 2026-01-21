@@ -31,7 +31,7 @@
             style="@style/ExoMediaButton.FastForward" />
 
         <ImageButton
-            android:id="@id/exo_aspect_ratio"
+            android:id="@+id/exo_aspect_ratio"
             android:layout_margin="4dp"
             android:src="@drawable/ic_aspect_ratio_white_24dp"
             android:contentDescription="@string/exo_controls_aspect_ratio_description"
