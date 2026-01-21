@@ -21,11 +21,12 @@ public class WatchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_watch);
 
-        StyledPlayerView playerView = findViewById(R.id.player_view);
+        final StyledPlayerView playerView = findViewById(R.id.player_view);
 
-        // Immersive flags similar to the reference app
+        // Immersive flags (similar to the reference app)
         playerView.setSystemUiVisibility(0x1307);
 
+        // Use explicit listener type to avoid Java lambda ambiguity
         playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
             @Override
             public void onVisibilityChanged(int visibility) {
@@ -34,20 +35,20 @@ public class WatchActivity extends AppCompatActivity {
                 }
             }
         });
-            }
-        });
 
         ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
-        aspectBtn.setOnClickListener(v -> {
-            if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM;
-            else if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL;
-            else
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
-
-            playerView.setResizeMode(resizeMode);
-        });
+        if (aspectBtn != null) {
+            aspectBtn.setOnClickListener(v -> {
+                if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT) {
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM;
+                } else if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM) {
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL;
+                } else {
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
+                }
+                playerView.setResizeMode(resizeMode);
+            });
+        }
 
         player = new ExoPlayer.Builder(this)
                 .setSeekForwardIncrementMs(10_000)
