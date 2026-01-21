@@ -2,10 +2,13 @@ package com.example.myvideoplayer
 
 import android.net.Uri
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.ComponentActivity
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.media3.ui.TrackSelectionDialogBuilder
 
 class PlayerActivity : ComponentActivity() {
 
@@ -15,7 +18,6 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
-        // Fullscreen immersive like your rental app
         window.decorView.systemUiVisibility = 0x1307
 
         val uri: Uri = intent.data ?: run {
@@ -25,29 +27,38 @@ class PlayerActivity : ComponentActivity() {
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
 
-        player = ExoPlayer.Builder(this)
-            .setSeekBackIncrementMs(15_000)    // 15 seconds back
-            .setSeekForwardIncrementMs(15_000) // 15 seconds forward
-            .build()
-            .also { exo ->
-                playerView.player = exo
-                exo.setMediaItem(MediaItem.fromUri(uri))
-                exo.prepare()
-                exo.playWhenReady = true
+        player = ExoPlayer.Builder(this).build().also { exo ->
+            playerView.player = exo
+            exo.setMediaItem(MediaItem.fromUri(uri))
+            exo.prepare()
+            exo.playWhenReady = true
+        }
 
-                // Always show controls
-                playerView.useController = true
-                playerView.controllerAutoShow = true
-                playerView.controllerShowTimeoutMs = 0
-                playerView.showController()
-            }
-    }
+        val back = findViewById<ImageButton>(R.id.btnBack15)
+        val play = findViewById<ImageButton>(R.id.btnPlayPause)
+        val fwd = findViewById<ImageButton>(R.id.btnFwd15)
+        val subs = findViewById<ImageButton>(R.id.btnSubtitles)
+        val audio = findViewById<ImageButton>(R.id.btnAudio)
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            window.decorView.systemUiVisibility = 0x1307
-            findViewById<PlayerView>(R.id.playerView).showController()
+        back.setOnClickListener {
+            player?.seekTo((player!!.currentPosition - 15000).coerceAtLeast(0))
+        }
+
+        fwd.setOnClickListener {
+            player?.seekTo(player!!.currentPosition + 15000)
+        }
+
+        play.setOnClickListener {
+            if (player!!.isPlaying) player!!.pause() else player!!.play()
+            play.setImageResource(if (player!!.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        }
+
+        subs.setOnClickListener {
+            TrackSelectionDialogBuilder(this, "Subtitles", player!!, C.TRACK_TYPE_TEXT).build().show()
+        }
+
+        audio.setOnClickListener {
+            TrackSelectionDialogBuilder(this, "Audio", player!!, C.TRACK_TYPE_AUDIO).build().show()
         }
     }
 
