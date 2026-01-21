@@ -7,6 +7,5 @@
     android:background="#000000"
     android:keepScreenOn="true"
     app:use_controller="true"
-    app:controller_show_timeout="0"
     app:show_buffering="when_playing"
     app:animation_enabled="false" />
