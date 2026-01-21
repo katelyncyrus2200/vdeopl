@@ -26,22 +26,23 @@ class PlayerActivity : ComponentActivity() {
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
 
-        player = ExoPlayer.Builder(this).build().also { exo ->
+        player = ExoPlayer.Builder(this)
             // Make default controller behave like your rental player (5s seek)
-            exo.setSeekBackIncrementMs(5000)
-            exo.setSeekForwardIncrementMs(5000)
+            .setSeekBackIncrementMs(5000)
+            .setSeekForwardIncrementMs(5000)
+            .build()
+            .also { exo ->
+                playerView.player = exo
+                exo.setMediaItem(MediaItem.fromUri(uri))
+                exo.prepare()
+                exo.playWhenReady = true
 
-            playerView.player = exo
-            exo.setMediaItem(MediaItem.fromUri(uri))
-            exo.prepare()
-            exo.playWhenReady = true
+                // Keep screen UI stable; you can tap to show/hide controls
+                playerView.controllerAutoShow = false
+                playerView.controllerShowTimeoutMs = 2000
 
-            // Keep screen UI stable; you can tap to show/hide controls
-            playerView.controllerAutoShow = false
-            playerView.controllerShowTimeoutMs = 2000
-
-            exo.repeatMode = Player.REPEAT_MODE_OFF
-        }
+                exo.repeatMode = Player.REPEAT_MODE_OFF
+            }
 
         // Tap toggles controller (VideoRental-like)
         playerView.setOnClickListener {
