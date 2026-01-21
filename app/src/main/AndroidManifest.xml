@@ -3,7 +3,7 @@
     package="com.example.exoplayerclone">
 
     <application
-        android:label="VideoRental Clone"
+        android:label="@string/app_name"
         android:theme="@style/Theme.VideoRentalClone">
         <activity
             android:name=".WatchActivity"

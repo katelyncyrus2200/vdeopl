@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">VideoRental Clone</string>
+
+    <!-- Used by our custom controller -->
+    <string name="exo_controls_aspect_ratio_description">Aspect ratio</string>
+    <string name="exo_controls_audio_description">Audio</string>
+    <string name="exo_controls_subtitle_description">Subtitles</string>
+
+    <!-- Some ExoPlayer versions reference this; define to be safe -->
+    <string name="exo_controls_cc_disabled_description">Subtitles off</string>
+</resources>
