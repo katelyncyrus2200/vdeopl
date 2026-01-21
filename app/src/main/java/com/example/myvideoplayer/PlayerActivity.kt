@@ -18,7 +18,8 @@ class PlayerActivity : ComponentActivity() {
     private var player: ExoPlayer? = null
     private val handler = Handler(Looper.getMainLooper())
 
-    private var bottomBar: View? = null
+    private var centerControls: View? = null
+    private var topRightButtons: View? = null
     private var hideRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,9 +35,9 @@ class PlayerActivity : ComponentActivity() {
         }
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
-        bottomBar = findViewById(R.id.bottomBar)
+        centerControls = findViewById(R.id.centerControls)
+        topRightButtons = findViewById(R.id.topRightButtons)
 
-        // Setup player
         player = ExoPlayer.Builder(this).build().also { exo ->
             playerView.player = exo
             exo.setMediaItem(MediaItem.fromUri(uri))
@@ -47,24 +48,22 @@ class PlayerActivity : ComponentActivity() {
         val btnBack = findViewById<ImageButton>(R.id.btnBack15)
         val btnPlayPause = findViewById<ImageButton>(R.id.btnPlayPause)
         val btnFwd = findViewById<ImageButton>(R.id.btnFwd15)
+
+        // Optional audio/subtitle buttons (if you removed them from XML, remove these lines too)
         val btnSubs = findViewById<ImageButton>(R.id.btnSubtitles)
         val btnAudio = findViewById<ImageButton>(R.id.btnAudio)
 
         fun updatePlayIcon() {
             val exo = player ?: return
-            btnPlayPause.setImageResource(
-                if (exo.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-            )
+            btnPlayPause.setImageResource(if (exo.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         }
 
-        // Back 15 seconds
         btnBack.setOnClickListener {
             val exo = player ?: return@setOnClickListener
             exo.seekTo((exo.currentPosition - 15_000).coerceAtLeast(0))
             showControlsTemporarily()
         }
 
-        // Forward 15 seconds
         btnFwd.setOnClickListener {
             val exo = player ?: return@setOnClickListener
             val dur = exo.duration
@@ -73,7 +72,6 @@ class PlayerActivity : ComponentActivity() {
             showControlsTemporarily()
         }
 
-        // Play / Pause
         btnPlayPause.setOnClickListener {
             val exo = player ?: return@setOnClickListener
             if (exo.isPlaying) exo.pause() else exo.play()
@@ -81,36 +79,31 @@ class PlayerActivity : ComponentActivity() {
             showControlsTemporarily()
         }
 
-        // Subtitles menu
         btnSubs.setOnClickListener {
             val exo = player ?: return@setOnClickListener
-            TrackSelectionDialogBuilder(this, "Subtitles", exo, C.TRACK_TYPE_TEXT)
-                .build()
-                .show()
+            TrackSelectionDialogBuilder(this, "Subtitles", exo, C.TRACK_TYPE_TEXT).build().show()
             showControlsTemporarily()
         }
 
-        // Audio menu
         btnAudio.setOnClickListener {
             val exo = player ?: return@setOnClickListener
-            TrackSelectionDialogBuilder(this, "Audio", exo, C.TRACK_TYPE_AUDIO)
-                .build()
-                .show()
+            TrackSelectionDialogBuilder(this, "Audio", exo, C.TRACK_TYPE_AUDIO).build().show()
             showControlsTemporarily()
         }
 
-        // Tap video → show/hide controls
-        playerView.setOnClickListener {
-            toggleControls()
-        }
+        // Tap video -> toggle controls
+        playerView.setOnClickListener { toggleControls() }
 
         updatePlayIcon()
     }
 
     private fun toggleControls() {
-        val bar = bottomBar ?: return
-        if (bar.visibility == View.VISIBLE) {
-            bar.visibility = View.GONE
+        val center = centerControls ?: return
+        val top = topRightButtons
+
+        if (center.visibility == View.VISIBLE) {
+            center.visibility = View.GONE
+            top?.visibility = View.GONE
             cancelAutoHide()
         } else {
             showControlsTemporarily()
@@ -118,11 +111,18 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun showControlsTemporarily() {
-        val bar = bottomBar ?: return
-        bar.visibility = View.VISIBLE
+        val center = centerControls ?: return
+        val top = topRightButtons
+
+        center.visibility = View.VISIBLE
+        top?.visibility = View.VISIBLE
+
         cancelAutoHide()
-        hideRunnable = Runnable { bar.visibility = View.GONE }
-        handler.postDelayed(hideRunnable!!, 2500) // auto-hide after 2.5s
+        hideRunnable = Runnable {
+            center.visibility = View.GONE
+            top?.visibility = View.GONE
+        }
+        handler.postDelayed(hideRunnable!!, 2500) // hide after 2.5 seconds
     }
 
     private fun cancelAutoHide() {

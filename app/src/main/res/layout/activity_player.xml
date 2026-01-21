@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Video surface -->
+    <!-- Video -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
@@ -14,49 +14,56 @@
         app:use_controller="false"
         app:animation_enabled="false" />
 
-    <!-- Bottom controls (hidden by default) -->
+    <!-- Center controls (hidden by default) -->
     <LinearLayout
-        android:id="@+id/bottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="bottom"
-        android:background="#CC000000"
-        android:gravity="center_vertical"
+        android:id="@+id/centerControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="horizontal"
         android:padding="12dp"
+        android:background="#66000000"
         android:visibility="gone">
 
-        <!-- Back 15 sec -->
+        <!-- Back 15s -->
         <ImageButton
             android:id="@+id/btnBack15"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_rew_15" />
 
         <!-- Play / Pause -->
         <ImageButton
             android:id="@+id/btnPlayPause"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_play" />
 
-        <!-- Forward 15 sec -->
+        <!-- Forward 15s -->
         <ImageButton
             android:id="@+id/btnFwd15"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_fwd_15" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+    </LinearLayout>
 
-        <!-- Subtitles -->
+    <!-- Optional: Audio/Subtitles in top-right (remove if you don’t want them) -->
+    <LinearLayout
+        android:id="@+id/topRightButtons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:visibility="gone">
+
         <ImageButton
             android:id="@+id/btnSubtitles"
             android:layout_width="48dp"
@@ -64,14 +71,12 @@
             android:background="@android:color/transparent"
             android:src="@drawable/ic_cc" />
 
-        <!-- Audio -->
         <ImageButton
             android:id="@+id/btnAudio"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_audio" />
-
     </LinearLayout>
 
 </FrameLayout>
