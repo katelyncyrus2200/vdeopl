@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -23,6 +24,7 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
+        // immersive fullscreen like VideoRental
         window.decorView.systemUiVisibility = 0x1307
 
         val uri: Uri = intent.data ?: run {
@@ -40,24 +42,26 @@ class PlayerActivity : ComponentActivity() {
             exo.playWhenReady = true
         }
 
-        val btnBack = findViewById<ImageButton>(R.id.btnBack15)
+        val btnBack = findViewById<TextView>(R.id.btnBack15)
         val btnPlayPause = findViewById<ImageButton>(R.id.btnPlayPause)
-        val btnFwd = findViewById<ImageButton>(R.id.btnFwd15)
+        val btnFwd = findViewById<TextView>(R.id.btnFwd15)
 
         fun updatePlayIcon() {
             val exo = player ?: return
-            btnPlayPause.setImageResource(if (exo.isPlaying) R.drawable.ic_pause_circle else R.drawable.ic_play_circle)
+            btnPlayPause.setImageResource(if (exo.isPlaying) R.drawable.ic_vr_pause_circle else R.drawable.ic_vr_play_circle)
         }
 
         btnBack.setOnClickListener {
             val exo = player ?: return@setOnClickListener
-            exo.seekTo((exo.currentPosition - 15000).coerceAtLeast(0))
+            exo.seekTo((exo.currentPosition - 15_000).coerceAtLeast(0))
             showControlsTemporarily()
         }
 
         btnFwd.setOnClickListener {
             val exo = player ?: return@setOnClickListener
-            exo.seekTo(exo.currentPosition + 15000)
+            val dur = exo.duration
+            val target = exo.currentPosition + 15_000
+            exo.seekTo(if (dur > 0) target.coerceAtMost(dur) else target)
             showControlsTemporarily()
         }
 
@@ -68,6 +72,7 @@ class PlayerActivity : ComponentActivity() {
             showControlsTemporarily()
         }
 
+        // tap video to show/hide controls
         playerView.setOnClickListener { toggleControls() }
 
         updatePlayIcon()
