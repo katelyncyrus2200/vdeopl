@@ -1,8 +1,11 @@
 package com.example.exoplayerclone;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
@@ -20,6 +23,15 @@ public class WatchActivity extends AppCompatActivity {
 
         StyledPlayerView playerView = findViewById(R.id.player_view);
 
+        // Immersive flags similar to the reference app
+        playerView.setSystemUiVisibility(0x1307);
+
+        playerView.setControllerVisibilityListener(visibility -> {
+            if (visibility == View.GONE) {
+                playerView.setSystemUiVisibility(0x1307);
+            }
+        });
+
         ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
         aspectBtn.setOnClickListener(v -> {
             if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
@@ -32,11 +44,15 @@ public class WatchActivity extends AppCompatActivity {
             playerView.setResizeMode(resizeMode);
         });
 
-        player = new ExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this)
+                .setSeekForwardIncrementMs(10_000)
+                .setSeekBackIncrementMs(10_000)
+                .build();
+
         playerView.setPlayer(player);
 
         MediaItem mediaItem = MediaItem.fromUri(
-            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
         );
         player.setMediaItem(mediaItem);
         player.prepare();
