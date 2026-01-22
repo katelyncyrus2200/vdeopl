@@ -26,9 +26,9 @@ public class WatchActivity extends AppCompatActivity {
     private boolean pickerShown = false;
     private @Nullable Uri pickedVideoUri = null;
 
-    // Center overlay: only 3 buttons (rew15 / play-pause / ffwd15)
+    // Center overlay buttons
     private LinearLayout centerControls;
-    private ImageButton centerRew15, centerPlayPause, centerFfwd15;
+    private ImageButton centerRew, centerPlayPause, centerFfwd;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Runnable hideCenter = () -> {
@@ -58,59 +58,43 @@ public class WatchActivity extends AppCompatActivity {
 
         playerView = findViewById(R.id.player_view);
 
-        // Bottom controller behavior
+        // Bottom controller
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
         playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
-        // Center overlay views (must match activity_watch.xml ids)
+        // Center overlay
         centerControls = findViewById(R.id.center_controls);
-        centerRew15 = findViewById(R.id.center_rew_15);
+        centerRew = findViewById(R.id.center_rew);
         centerPlayPause = findViewById(R.id.center_play_pause);
-        centerFfwd15 = findViewById(R.id.center_ffwd_15);
+        centerFfwd = findViewById(R.id.center_ffwd);
 
-        // Tap video = show overlay + controller
-        playerView.setClickable(true);
+        // Tap video = show overlay
         playerView.setOnClickListener(v -> showCenterOverlay());
 
         initPlayer();
 
-        // REW 15s
-        if (centerRew15 != null) {
-            centerRew15.setOnClickListener(v -> {
-                if (player != null) {
-                    long pos = player.getCurrentPosition();
-                    player.seekTo(Math.max(0, pos - 15_000));
-                }
-                showCenterOverlay();
-            });
-        }
+        // Rewind
+        centerRew.setOnClickListener(v -> {
+            if (player != null) player.seekBack();
+            showCenterOverlay();
+        });
 
-        // PLAY / PAUSE
-        if (centerPlayPause != null) {
-            centerPlayPause.setOnClickListener(v -> {
-                if (player == null) return;
-                if (player.isPlaying()) player.pause();
-                else player.play();
-                updateCenterPlayPauseIcon();
-                showCenterOverlay();
-            });
-        }
+        // Fast forward
+        centerFfwd.setOnClickListener(v -> {
+            if (player != null) player.seekForward();
+            showCenterOverlay();
+        });
 
-        // FFWD 15s
-        if (centerFfwd15 != null) {
-            centerFfwd15.setOnClickListener(v -> {
-                if (player != null) {
-                    long pos = player.getCurrentPosition();
-                    long dur = player.getDuration();
-                    long target = pos + 15_000;
-                    if (dur > 0) target = Math.min(dur, target);
-                    player.seekTo(target);
-                }
-                showCenterOverlay();
-            });
-        }
+        // Play / Pause
+        centerPlayPause.setOnClickListener(v -> {
+            if (player == null) return;
+            if (player.isPlaying()) player.pause();
+            else player.play();
+            updateCenterPlayPauseIcon();
+            showCenterOverlay();
+        });
     }
 
     @Override
@@ -128,10 +112,9 @@ public class WatchActivity extends AppCompatActivity {
     private void initPlayer() {
         if (player != null) return;
 
-        // Use 15s seek increments (matches your overlay buttons)
         player = new ExoPlayer.Builder(this)
-                .setSeekBackIncrementMs(15_000)
-                .setSeekForwardIncrementMs(15_000)
+                .setSeekBackIncrementMs(15000)
+                .setSeekForwardIncrementMs(15000)
                 .build();
 
         playerView.setPlayer(player);
@@ -150,23 +133,20 @@ public class WatchActivity extends AppCompatActivity {
     }
 
     private void showCenterOverlay() {
-        // show bottom controller too
-        if (playerView != null) playerView.showController();
-
-        if (centerControls != null) centerControls.setVisibility(View.VISIBLE);
+        playerView.showController();
+        centerControls.setVisibility(View.VISIBLE);
 
         uiHandler.removeCallbacks(hideCenter);
         uiHandler.postDelayed(hideCenter, 2500);
     }
 
     private void updateCenterPlayPauseIcon() {
-        if (centerPlayPause == null || player == null) return;
+        if (player == null) return;
 
-        // ExoPlayer built-in icons (from exoplayer-ui)
         if (player.isPlaying()) {
-            centerPlayPause.setImageResource(R.drawable.exo_styled_controls_pause);
+            centerPlayPause.setImageResource(R.drawable.exo_controls_pause);
         } else {
-            centerPlayPause.setImageResource(R.drawable.exo_styled_controls_play);
+            centerPlayPause.setImageResource(R.drawable.exo_controls_play);
         }
     }
 

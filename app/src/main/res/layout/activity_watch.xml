@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#000">
 
+    <!-- Video -->
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
@@ -14,7 +15,7 @@
         app:controller_layout_id="@layout/exo_playback_control_view"
         app:auto_show="false" />
 
-    <!-- Center overlay: REW / PLAY-PAUSE / FFWD (ExoPlayer icons) -->
+    <!-- Center overlay -->
     <LinearLayout
         android:id="@+id/center_controls"
         android:layout_width="wrap_content"
@@ -26,38 +27,38 @@
         android:background="#66000000"
         android:padding="18dp">
 
+        <!-- Rewind -->
         <ImageButton
-            android:id="@+id/center_rew_15"
+            android:id="@+id/center_rew"
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_margin="14dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/exo_styled_controls_rewind"
+            android:src="@drawable/exo_controls_rewind"
             android:tint="#FFFFFF"
-            android:scaleType="centerInside"
-            android:padding="0dp" />
+            android:scaleType="centerInside"/>
 
+        <!-- Play / Pause -->
         <ImageButton
             android:id="@+id/center_play_pause"
             android:layout_width="132dp"
             android:layout_height="132dp"
             android:layout_margin="14dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/exo_styled_controls_play"
+            android:src="@drawable/exo_controls_play"
             android:tint="#FFFFFF"
-            android:scaleType="centerInside"
-            android:padding="0dp" />
+            android:scaleType="centerInside"/>
 
+        <!-- Fast Forward -->
         <ImageButton
-            android:id="@+id/center_ffwd_15"
+            android:id="@+id/center_ffwd"
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_margin="14dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/exo_styled_controls_fastforward"
+            android:src="@drawable/exo_controls_fastforward"
             android:tint="#FFFFFF"
-            android:scaleType="centerInside"
-            android:padding="0dp" />
+            android:scaleType="centerInside"/>
 
     </LinearLayout>
 
