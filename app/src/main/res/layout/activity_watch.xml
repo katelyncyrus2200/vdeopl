@@ -1,5 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout android:background="#ff000000" android:layout_width="fill_parent" android:layout_height="fill_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <com.google.android.exoplayer2.ui.StyledPlayerView android:id="@+id/player_view" android:layout_width="fill_parent" android:layout_height="fill_parent" app:animation_enabled="false" app:auto_show="false" app:controller_layout_id="@layout/exo_playback_control_view" app:show_subtitle_button="true" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <com.google.android.exoplayer2.ui.StyledPlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:animation_enabled="false"
+        app:auto_show="false"
+        app:controller_layout_id="@layout/exo_playback_control_view"
+        app:show_subtitle_button="true" />
+
+    <!-- Center overlay controls (big buttons) -->
+    <LinearLayout
+        android:id="@+id/center_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="#66000000"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/center_rew"
+            style="@style/ExoMediaButton.Rewind"
+            android:layout_margin="6dp" />
+
+        <ImageButton
+            android:id="@+id/center_play_pause"
+            style="@style/ExoMediaButton.Pause"
+            android:layout_margin="6dp" />
+
+        <ImageButton
+            android:id="@+id/center_ffwd"
+            style="@style/ExoMediaButton.FastForward"
+            android:layout_margin="6dp" />
+
+    </LinearLayout>
+
+</FrameLayout>

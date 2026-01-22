@@ -3,6 +3,8 @@ package com.example.exoplayerclone;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.ImageButton;
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.exoplayer2.ui.TrackSelectionDialogBuilder;
@@ -33,6 +36,16 @@ public class WatchActivity extends AppCompatActivity {
     private @Nullable Uri pickedVideoUri = null;
 
     private boolean controllerVisible = false;
+
+    private View centerControls;
+    private ImageButton centerRew;
+    private ImageButton centerPlayPause;
+    private ImageButton centerFfwd;
+
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private final Runnable hideCenterControls = () -> {
+        if (centerControls != null) centerControls.setVisibility(View.GONE);
+    };
 
     // Declare subtitle launcher FIRST to avoid "illegal forward reference"
     private final ActivityResultLauncher<String[]> openSubtitleLauncher =
@@ -70,6 +83,12 @@ public class WatchActivity extends AppCompatActivity {
 
         playerView = findViewById(R.id.player_view);
 
+        centerControls = findViewById(R.id.center_controls);
+        centerRew = findViewById(R.id.center_rew);
+        centerPlayPause = findViewById(R.id.center_play_pause);
+        centerFfwd = findViewById(R.id.center_ffwd);
+
+
         // Tap-to-show controls like original
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
@@ -82,8 +101,14 @@ public class WatchActivity extends AppCompatActivity {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (controllerVisible) {
                     playerView.hideController();
+                    if (centerControls != null) centerControls.setVisibility(View.GONE);
                 } else {
                     playerView.showController();
+                    if (centerControls != null) {
+                        centerControls.setVisibility(View.VISIBLE);
+                        uiHandler.removeCallbacks(hideCenterControls);
+                        uiHandler.postDelayed(hideCenterControls, 2500);
+                    }
                 }
                 return true;
             }
@@ -96,6 +121,15 @@ public class WatchActivity extends AppCompatActivity {
             @Override
             public void onVisibilityChanged(int visibility) {
                 controllerVisible = (visibility == View.VISIBLE);
+                if (centerControls != null) {
+                    if (visibility == View.VISIBLE) {
+                        centerControls.setVisibility(View.VISIBLE);
+                        uiHandler.removeCallbacks(hideCenterControls);
+                        uiHandler.postDelayed(hideCenterControls, 2500);
+                    } else {
+                        centerControls.setVisibility(View.GONE);
+                    }
+                }
                 if (visibility == View.GONE) {
                     playerView.setSystemUiVisibility(0x1307);
                 }
@@ -122,6 +156,28 @@ public class WatchActivity extends AppCompatActivity {
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
 
                 playerView.setResizeMode(resizeMode);
+            });
+        }
+
+        // Center overlay controls actions
+        if (centerRew != null) {
+            centerRew.setOnClickListener(v -> {
+                if (player != null) player.seekBack();
+                showCenterControlsBriefly();
+            });
+        }
+        if (centerFfwd != null) {
+            centerFfwd.setOnClickListener(v -> {
+                if (player != null) player.seekForward();
+                showCenterControlsBriefly();
+            });
+        }
+        if (centerPlayPause != null) {
+            centerPlayPause.setOnClickListener(v -> {
+                if (player == null) return;
+                player.setPlayWhenReady(!player.getPlayWhenReady());
+                updateCenterPlayPauseIcon();
+                showCenterControlsBriefly();
             });
         }
 
@@ -162,6 +218,14 @@ public class WatchActivity extends AppCompatActivity {
                 .build();
 
         playerView.setPlayer(player);
+
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                updateCenterPlayPauseIcon();
+            }
+        });
+        updateCenterPlayPauseIcon();
     }
 
     private void playPickedVideoWithOptionalSubtitle(@Nullable Uri subtitleUri) {
@@ -217,6 +281,7 @@ public class WatchActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        uiHandler.removeCallbacks(hideCenterControls);
         if (player != null) {
             player.release();
             player = null;
