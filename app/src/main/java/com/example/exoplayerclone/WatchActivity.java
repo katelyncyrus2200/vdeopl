@@ -5,8 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -37,6 +37,7 @@ public class WatchActivity extends AppCompatActivity {
 
     private boolean controllerVisible = false;
 
+    // Center overlay controls
     private View centerControls;
     private ImageButton centerRew;
     private ImageButton centerPlayPause;
@@ -88,14 +89,12 @@ public class WatchActivity extends AppCompatActivity {
         centerPlayPause = findViewById(R.id.center_play_pause);
         centerFfwd = findViewById(R.id.center_ffwd);
 
-
-        // Tap-to-show controls like original
+        // Tap-to-show controls like original (bottom controller + center overlay)
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
         playerView.setControllerHideOnTouch(false);   // we handle touch ourselves
         playerView.setControllerShowTimeoutMs(2500);
 
-        // Make sure the view receives touch events
         playerView.setClickable(true);
         playerView.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -104,11 +103,7 @@ public class WatchActivity extends AppCompatActivity {
                     if (centerControls != null) centerControls.setVisibility(View.GONE);
                 } else {
                     playerView.showController();
-                    if (centerControls != null) {
-                        centerControls.setVisibility(View.VISIBLE);
-                        uiHandler.removeCallbacks(hideCenterControls);
-                        uiHandler.postDelayed(hideCenterControls, 2500);
-                    }
+                    showCenterControlsBriefly();
                 }
                 return true;
             }
@@ -121,14 +116,8 @@ public class WatchActivity extends AppCompatActivity {
             @Override
             public void onVisibilityChanged(int visibility) {
                 controllerVisible = (visibility == View.VISIBLE);
-                if (centerControls != null) {
-                    if (visibility == View.VISIBLE) {
-                        centerControls.setVisibility(View.VISIBLE);
-                        uiHandler.removeCallbacks(hideCenterControls);
-                        uiHandler.postDelayed(hideCenterControls, 2500);
-                    } else {
-                        centerControls.setVisibility(View.GONE);
-                    }
+                if (!controllerVisible && centerControls != null) {
+                    centerControls.setVisibility(View.GONE);
                 }
                 if (visibility == View.GONE) {
                     playerView.setSystemUiVisibility(0x1307);
@@ -144,22 +133,7 @@ public class WatchActivity extends AppCompatActivity {
 
         initPlayerIfNeeded();
 
-        // Aspect ratio toggle
-        ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
-        if (aspectBtn != null) {
-            aspectBtn.setOnClickListener(v -> {
-                if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM;
-                else if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL;
-                else
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
-
-                playerView.setResizeMode(resizeMode);
-            });
-        }
-
-        // Center overlay controls actions
+        // Center overlay buttons actions
         if (centerRew != null) {
             centerRew.setOnClickListener(v -> {
                 if (player != null) player.seekBack();
@@ -175,8 +149,25 @@ public class WatchActivity extends AppCompatActivity {
         if (centerPlayPause != null) {
             centerPlayPause.setOnClickListener(v -> {
                 if (player == null) return;
-                player.setPlayWhenReady(!player.getPlayWhenReady());
+                if (player.isPlaying()) player.pause();
+                else player.play();
+                showCenterControlsBriefly();
                 updateCenterPlayPauseIcon();
+            });
+        }
+
+        // Aspect ratio toggle
+        ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
+        if (aspectBtn != null) {
+            aspectBtn.setOnClickListener(v -> {
+                if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM;
+                else if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL;
+                else
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
+
+                playerView.setResizeMode(resizeMode);
                 showCenterControlsBriefly();
             });
         }
@@ -228,6 +219,24 @@ public class WatchActivity extends AppCompatActivity {
         updateCenterPlayPauseIcon();
     }
 
+    private void showCenterControlsBriefly() {
+        if (centerControls == null) return;
+        centerControls.setVisibility(View.VISIBLE);
+        uiHandler.removeCallbacks(hideCenterControls);
+        uiHandler.postDelayed(hideCenterControls, 2500);
+    }
+
+    private void updateCenterPlayPauseIcon() {
+        if (centerPlayPause == null || player == null) return;
+
+        // Use ExoPlayer UI drawables to avoid missing resources
+        if (player.isPlaying()) {
+            centerPlayPause.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_pause);
+        } else {
+            centerPlayPause.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_play);
+        }
+    }
+
     private void playPickedVideoWithOptionalSubtitle(@Nullable Uri subtitleUri) {
         if (pickedVideoUri == null) return;
 
@@ -262,6 +271,8 @@ public class WatchActivity extends AppCompatActivity {
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
+        updateCenterPlayPauseIcon();
+        showCenterControlsBriefly();
     }
 
     private String guessSubtitleMimeType(Uri subtitleUri) {
