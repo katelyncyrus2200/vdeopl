@@ -48,7 +48,7 @@ public class WatchActivity extends AppCompatActivity {
         if (centerControls != null) centerControls.setVisibility(View.GONE);
     };
 
-    // Declare subtitle launcher FIRST to avoid "illegal forward reference"
+    // Declare subtitle launcher FIRST
     private final ActivityResultLauncher<String[]> openSubtitleLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
                 playPickedVideoWithOptionalSubtitle(subtitleUri); // cancel => null
@@ -89,10 +89,10 @@ public class WatchActivity extends AppCompatActivity {
         centerPlayPause = findViewById(R.id.center_play_pause);
         centerFfwd = findViewById(R.id.center_ffwd);
 
-        // Tap-to-show controls like original (bottom controller + center overlay)
+        // Tap-to-show controls
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
-        playerView.setControllerHideOnTouch(false);   // we handle touch ourselves
+        playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
         playerView.setClickable(true);
@@ -112,17 +112,10 @@ public class WatchActivity extends AppCompatActivity {
 
         // Immersive flags like original
         playerView.setSystemUiVisibility(0x1307);
-        playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
-            @Override
-            public void onVisibilityChanged(int visibility) {
-                controllerVisible = (visibility == View.VISIBLE);
-                if (!controllerVisible && centerControls != null) {
-                    centerControls.setVisibility(View.GONE);
-                }
-                if (visibility == View.GONE) {
-                    playerView.setSystemUiVisibility(0x1307);
-                }
-            }
+        playerView.setControllerVisibilityListener(visibility -> {
+            controllerVisible = (visibility == View.VISIBLE);
+            if (!controllerVisible && centerControls != null) centerControls.setVisibility(View.GONE);
+            if (visibility == View.GONE) playerView.setSystemUiVisibility(0x1307);
         });
 
         if (savedInstanceState != null) {
@@ -133,7 +126,7 @@ public class WatchActivity extends AppCompatActivity {
 
         initPlayerIfNeeded();
 
-        // Center overlay buttons actions
+        // Center overlay buttons
         if (centerRew != null) {
             centerRew.setOnClickListener(v -> {
                 if (player != null) player.seekBack();
@@ -157,7 +150,7 @@ public class WatchActivity extends AppCompatActivity {
         }
 
         // Aspect ratio toggle
-        ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
+        ImageButton aspectBtn = findViewById(R.id.exo_aspect_ratio);
         if (aspectBtn != null) {
             aspectBtn.setOnClickListener(v -> {
                 if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
@@ -172,8 +165,8 @@ public class WatchActivity extends AppCompatActivity {
             });
         }
 
-        // Audio track button
-        ImageButton audioBtn = playerView.findViewById(R.id.exo_audio_track);
+        // Audio track dialog
+        ImageButton audioBtn = findViewById(R.id.exo_audio_track);
         if (audioBtn != null) {
             audioBtn.setOnClickListener(v -> {
                 if (player == null) return;
@@ -192,7 +185,6 @@ public class WatchActivity extends AppCompatActivity {
         super.onStart();
         initPlayerIfNeeded();
 
-        // Auto picker on first launch
         if (!videoPickerShown) {
             videoPickerShown = true;
             openVideoLauncher.launch(new String[]{"video/*"});
@@ -211,8 +203,7 @@ public class WatchActivity extends AppCompatActivity {
         playerView.setPlayer(player);
 
         player.addListener(new Player.Listener() {
-            @Override
-            public void onIsPlayingChanged(boolean isPlaying) {
+            @Override public void onIsPlayingChanged(boolean isPlaying) {
                 updateCenterPlayPauseIcon();
             }
         });
@@ -228,13 +219,8 @@ public class WatchActivity extends AppCompatActivity {
 
     private void updateCenterPlayPauseIcon() {
         if (centerPlayPause == null || player == null) return;
-
-        // Use ExoPlayer UI drawables to avoid missing resources
-        if (player.isPlaying()) {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_pause);
-        } else {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_play);
-        }
+        if (player.isPlaying()) centerPlayPause.setImageResource(R.drawable.exo_controls_pause);
+        else centerPlayPause.setImageResource(R.drawable.exo_controls_play);
     }
 
     private void playPickedVideoWithOptionalSubtitle(@Nullable Uri subtitleUri) {
@@ -263,9 +249,7 @@ public class WatchActivity extends AppCompatActivity {
                     .setSubtitleConfigurations(Collections.singletonList(sub))
                     .build();
         } else {
-            mediaItem = new MediaItem.Builder()
-                    .setUri(pickedVideoUri)
-                    .build();
+            mediaItem = new MediaItem.Builder().setUri(pickedVideoUri).build();
         }
 
         player.setMediaItem(mediaItem);
@@ -279,7 +263,7 @@ public class WatchActivity extends AppCompatActivity {
         String name = subtitleUri.getLastPathSegment();
         if (name != null) name = name.toLowerCase();
         if (name != null && name.endsWith(".vtt")) return MimeTypes.TEXT_VTT;
-        return MimeTypes.APPLICATION_SUBRIP; // default SRT
+        return MimeTypes.APPLICATION_SUBRIP;
     }
 
     @Override
