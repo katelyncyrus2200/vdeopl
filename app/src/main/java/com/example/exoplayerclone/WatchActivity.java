@@ -26,7 +26,7 @@ public class WatchActivity extends AppCompatActivity {
     private boolean pickerShown = false;
     private @Nullable Uri pickedVideoUri = null;
 
-    // Center overlay (ONLY 3 buttons)
+    // Center overlay: only 3 buttons (rew15 / play-pause / ffwd15)
     private LinearLayout centerControls;
     private ImageButton centerRew15, centerPlayPause, centerFfwd15;
 
@@ -64,7 +64,7 @@ public class WatchActivity extends AppCompatActivity {
         playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
-        // Center overlay views
+        // Center overlay views (must match activity_watch.xml ids)
         centerControls = findViewById(R.id.center_controls);
         centerRew15 = findViewById(R.id.center_rew_15);
         centerPlayPause = findViewById(R.id.center_play_pause);
@@ -128,9 +128,13 @@ public class WatchActivity extends AppCompatActivity {
     private void initPlayer() {
         if (player != null) return;
 
-        player = new ExoPlayer.Builder(this).build();
-        playerView.setPlayer(player);
+        // Use 15s seek increments (matches your overlay buttons)
+        player = new ExoPlayer.Builder(this)
+                .setSeekBackIncrementMs(15_000)
+                .setSeekForwardIncrementMs(15_000)
+                .build();
 
+        playerView.setPlayer(player);
         updateCenterPlayPauseIcon();
     }
 
@@ -146,7 +150,9 @@ public class WatchActivity extends AppCompatActivity {
     }
 
     private void showCenterOverlay() {
+        // show bottom controller too
         if (playerView != null) playerView.showController();
+
         if (centerControls != null) centerControls.setVisibility(View.VISIBLE);
 
         uiHandler.removeCallbacks(hideCenter);
@@ -156,10 +162,11 @@ public class WatchActivity extends AppCompatActivity {
     private void updateCenterPlayPauseIcon() {
         if (centerPlayPause == null || player == null) return;
 
+        // ExoPlayer built-in icons (from exoplayer-ui)
         if (player.isPlaying()) {
-            centerPlayPause.setImageResource(R.drawable.ic_pause_circle);
+            centerPlayPause.setImageResource(R.drawable.exo_styled_controls_pause);
         } else {
-            centerPlayPause.setImageResource(R.drawable.ic_play_circle);
+            centerPlayPause.setImageResource(R.drawable.exo_styled_controls_play);
         }
     }
 
