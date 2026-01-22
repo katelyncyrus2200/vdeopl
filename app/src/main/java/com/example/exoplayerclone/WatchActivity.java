@@ -31,6 +31,8 @@ public class WatchActivity extends AppCompatActivity {
     private boolean videoPickerShown = false;
     private @Nullable Uri pickedVideoUri = null;
 
+    private boolean controllerVisible = false;
+
     // Declare subtitle launcher FIRST to avoid "illegal forward reference"
     private final ActivityResultLauncher<String[]> openSubtitleLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
@@ -73,8 +75,11 @@ public class WatchActivity extends AppCompatActivity {
         playerView.setControllerHideOnTouch(true);
         playerView.setControllerShowTimeoutMs(2500);
         playerView.setOnClickListener(v -> {
-            if (playerView.isControllerVisible()) playerView.hideController();
-            else playerView.showController();
+            if (controllerVisible) {
+                playerView.hideController();
+            } else {
+                playerView.showController();
+            }
         });
 
         // Immersive flags like original
@@ -82,6 +87,7 @@ public class WatchActivity extends AppCompatActivity {
         playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
             @Override
             public void onVisibilityChanged(int visibility) {
+                controllerVisible = (visibility == View.VISIBLE);
                 if (visibility == View.GONE) {
                     playerView.setSystemUiVisibility(0x1307);
                 }
