@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -16,23 +14,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.StyledPlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 
 public class WatchActivity extends AppCompatActivity {
 
     private StyledPlayerView playerView;
+    private StyledPlayerControlView centerOverlayControls;
     private ExoPlayer player;
 
     private boolean pickerShown = false;
     private @Nullable Uri pickedVideoUri = null;
 
-    // Center overlay buttons
-    private LinearLayout centerControls;
-    private ImageButton centerRew, centerPlayPause, centerFfwd;
-
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
-    private final Runnable hideCenter = () -> {
-        if (centerControls != null) centerControls.setVisibility(View.GONE);
+    private final Runnable hideCenterOverlay = () -> {
+        if (centerOverlayControls != null) centerOverlayControls.setVisibility(View.GONE);
     };
 
     private final ActivityResultLauncher<String[]> picker =
@@ -48,7 +44,7 @@ public class WatchActivity extends AppCompatActivity {
 
                 pickedVideoUri = uri;
                 play(uri);
-                showCenterOverlay();
+                showControls();
             });
 
     @Override
@@ -57,50 +53,22 @@ public class WatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_watch);
 
         playerView = findViewById(R.id.player_view);
+        centerOverlayControls = findViewById(R.id.center_overlay_controls);
 
-        // Bottom controller
+        // Full default ExoPlayer controller (CC/overflow/settings etc.)
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
         playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
-        // Center overlay
-        centerControls = findViewById(R.id.center_controls);
-        centerRew = findViewById(R.id.center_rew);
-        centerPlayPause = findViewById(R.id.center_play_pause);
-        centerFfwd = findViewById(R.id.center_ffwd);
-
-        // Tap video = show overlay
-        playerView.setOnClickListener(v -> showCenterOverlay());
+        playerView.setOnClickListener(v -> showControls());
 
         initPlayer();
-
-        // Rewind
-        centerRew.setOnClickListener(v -> {
-            if (player != null) player.seekBack();
-            showCenterOverlay();
-        });
-
-        // Fast forward
-        centerFfwd.setOnClickListener(v -> {
-            if (player != null) player.seekForward();
-            showCenterOverlay();
-        });
-
-        // Play / Pause
-        centerPlayPause.setOnClickListener(v -> {
-            if (player == null) return;
-            if (player.isPlaying()) player.pause();
-            else player.play();
-            updateCenterPlayPauseIcon();
-            showCenterOverlay();
-        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         if (!pickerShown) {
             pickerShown = true;
             picker.launch(new String[]{"video/*"});
@@ -112,49 +80,35 @@ public class WatchActivity extends AppCompatActivity {
     private void initPlayer() {
         if (player != null) return;
 
+        // 15s skip behavior (icons are still Exo styled)
         player = new ExoPlayer.Builder(this)
-                .setSeekBackIncrementMs(15000)
-                .setSeekForwardIncrementMs(15000)
+                .setSeekBackIncrementMs(15_000)
+                .setSeekForwardIncrementMs(15_000)
                 .build();
 
         playerView.setPlayer(player);
-        updateCenterPlayPauseIcon();
+        centerOverlayControls.setPlayer(player);
     }
 
     private void play(Uri uri) {
         if (player == null) initPlayer();
-
-        MediaItem item = MediaItem.fromUri(uri);
-        player.setMediaItem(item);
+        player.setMediaItem(MediaItem.fromUri(uri));
         player.prepare();
         player.play();
-
-        updateCenterPlayPauseIcon();
     }
 
-    private void showCenterOverlay() {
+    private void showControls() {
         playerView.showController();
-        centerControls.setVisibility(View.VISIBLE);
 
-        uiHandler.removeCallbacks(hideCenter);
-        uiHandler.postDelayed(hideCenter, 2500);
-    }
-
-    private void updateCenterPlayPauseIcon() {
-        if (player == null) return;
-
-        if (player.isPlaying()) {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_pause);
-        } else {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_play);
-        }
+        centerOverlayControls.setVisibility(View.VISIBLE);
+        uiHandler.removeCallbacks(hideCenterOverlay);
+        uiHandler.postDelayed(hideCenterOverlay, 2500);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        uiHandler.removeCallbacks(hideCenter);
-
+        uiHandler.removeCallbacks(hideCenterOverlay);
         if (player != null) {
             player.release();
             player = null;

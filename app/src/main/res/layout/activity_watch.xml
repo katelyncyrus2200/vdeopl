@@ -6,60 +6,25 @@
     android:layout_height="match_parent"
     android:background="#000">
 
-    <!-- Video -->
+    <!-- This uses ExoPlayer DEFAULT bottom controller (CC, overflow, settings, etc.) -->
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:use_controller="true"
-        app:controller_layout_id="@layout/exo_playback_control_view"
-        app:auto_show="false" />
+        app:controller_auto_show="false"
+        app:controller_hide_on_touch="false"
+        app:show_timeout="2500" />
 
-    <!-- Center overlay -->
-    <LinearLayout
-        android:id="@+id/center_controls"
+    <!-- Center overlay using ExoPlayer styled control view -->
+    <com.google.android.exoplayer2.ui.StyledPlayerControlView
+        android:id="@+id/center_overlay_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="horizontal"
-        android:gravity="center"
         android:visibility="gone"
         android:background="#66000000"
-        android:padding="18dp">
-
-        <!-- Rewind -->
-        <ImageButton
-            android:id="@+id/center_rew"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_margin="14dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/exo_controls_rewind"
-            android:tint="#FFFFFF"
-            android:scaleType="centerInside"/>
-
-        <!-- Play / Pause -->
-        <ImageButton
-            android:id="@+id/center_play_pause"
-            android:layout_width="132dp"
-            android:layout_height="132dp"
-            android:layout_margin="14dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/exo_controls_play"
-            android:tint="#FFFFFF"
-            android:scaleType="centerInside"/>
-
-        <!-- Fast Forward -->
-        <ImageButton
-            android:id="@+id/center_ffwd"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_margin="14dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/exo_controls_fastforward"
-            android:tint="#FFFFFF"
-            android:scaleType="centerInside"/>
-
-    </LinearLayout>
+        android:padding="18dp"
+        app:controller_layout_id="@layout/exo_center_overlay_controls" />
 
 </FrameLayout>
