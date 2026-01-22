@@ -231,9 +231,9 @@ public class WatchActivity extends AppCompatActivity {
 
         // Use ExoPlayer UI drawables to avoid missing resources
         if (player.isPlaying()) {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_pause);
+            centerPlayPause.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_pause);
         } else {
-            centerPlayPause.setImageResource(R.drawable.exo_controls_play);
+            centerPlayPause.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_play);
         }
     }
 
