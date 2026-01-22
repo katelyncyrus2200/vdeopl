@@ -26,9 +26,9 @@ public class WatchActivity extends AppCompatActivity {
     private boolean pickerShown = false;
     private @Nullable Uri pickedVideoUri = null;
 
-    // Center overlay
+    // Center overlay (ONLY 3 buttons)
     private LinearLayout centerControls;
-    private ImageButton centerRew15, centerRew, centerPlayPause, centerFfwd, centerFfwd15;
+    private ImageButton centerRew15, centerPlayPause, centerFfwd15;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Runnable hideCenter = () -> {
@@ -67,9 +67,7 @@ public class WatchActivity extends AppCompatActivity {
         // Center overlay views
         centerControls = findViewById(R.id.center_controls);
         centerRew15 = findViewById(R.id.center_rew_15);
-        centerRew = findViewById(R.id.center_rew);
         centerPlayPause = findViewById(R.id.center_play_pause);
-        centerFfwd = findViewById(R.id.center_ffwd);
         centerFfwd15 = findViewById(R.id.center_ffwd_15);
 
         // Tap video = show overlay + controller
@@ -78,7 +76,7 @@ public class WatchActivity extends AppCompatActivity {
 
         initPlayer();
 
-        // 15s rewind
+        // REW 15s
         if (centerRew15 != null) {
             centerRew15.setOnClickListener(v -> {
                 if (player != null) {
@@ -89,15 +87,7 @@ public class WatchActivity extends AppCompatActivity {
             });
         }
 
-        // rewind (uses ExoPlayer seekBack increment, typically 10s if configured)
-        if (centerRew != null) {
-            centerRew.setOnClickListener(v -> {
-                if (player != null) player.seekBack();
-                showCenterOverlay();
-            });
-        }
-
-        // play/pause
+        // PLAY / PAUSE
         if (centerPlayPause != null) {
             centerPlayPause.setOnClickListener(v -> {
                 if (player == null) return;
@@ -108,15 +98,7 @@ public class WatchActivity extends AppCompatActivity {
             });
         }
 
-        // ffwd (uses ExoPlayer seekForward increment)
-        if (centerFfwd != null) {
-            centerFfwd.setOnClickListener(v -> {
-                if (player != null) player.seekForward();
-                showCenterOverlay();
-            });
-        }
-
-        // 15s ffwd
+        // FFWD 15s
         if (centerFfwd15 != null) {
             centerFfwd15.setOnClickListener(v -> {
                 if (player != null) {
@@ -164,9 +146,7 @@ public class WatchActivity extends AppCompatActivity {
     }
 
     private void showCenterOverlay() {
-        // show bottom controller too
         if (playerView != null) playerView.showController();
-
         if (centerControls != null) centerControls.setVisibility(View.VISIBLE);
 
         uiHandler.removeCallbacks(hideCenter);
