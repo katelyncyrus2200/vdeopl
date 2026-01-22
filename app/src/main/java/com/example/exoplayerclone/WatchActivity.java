@@ -79,21 +79,6 @@ public class WatchActivity extends AppCompatActivity {
             }
         });
 
-        // Show controls only when the user taps the screen (like the original app)
-        playerView.setUseController(true);
-        playerView.setControllerAutoShow(false);      // don't show automatically
-        playerView.setControllerHideOnTouch(true);    // tap hides when visible
-        playerView.setControllerShowTimeoutMs(2500);  // auto-hide after 2.5s
-
-        playerView.setOnClickListener(v -> {
-            if (playerView.isControllerVisible()) {
-                playerView.hideController();
-            } else {
-                playerView.showController();
-            }
-        });
-
-
         if (savedInstanceState != null) {
             videoPickerShown = savedInstanceState.getBoolean("videoPickerShown", false);
             String savedVideo = savedInstanceState.getString("pickedVideoUri", null);
@@ -149,8 +134,8 @@ public class WatchActivity extends AppCompatActivity {
 
         player = new ExoPlayer.Builder(this)
                 // User requested skip buttons like original; set 15 seconds
-                .setSeekForwardIncrementMs(15_000)
-                .setSeekBackIncrementMs(15_000)
+                .setSeekForwardIncrementMs(10_000)
+                .setSeekBackIncrementMs(10_000)
                 .build();
 
         playerView.setPlayer(player);

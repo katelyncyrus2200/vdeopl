@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="exo_aspect_ratio" />
+    <item type="id" name="exo_audio_track" />
+</resources>
