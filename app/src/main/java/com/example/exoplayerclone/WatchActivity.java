@@ -32,6 +32,12 @@ public class WatchActivity extends AppCompatActivity {
 
     private @Nullable Uri pickedVideoUri = null;
 
+    private final ActivityResultLauncher<String[]> openSubtitleLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
+                // User can cancel subtitle picker -> just play video without external subs
+                playPickedVideoWithOptionalSubtitle(subtitleUri);
+            });
+
     private final ActivityResultLauncher<String[]> openVideoLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
                 if (uri == null) {
@@ -54,12 +60,7 @@ public class WatchActivity extends AppCompatActivity {
                         "application/octet-stream"
                 });
             });
-
-    private final ActivityResultLauncher<String[]> openSubtitleLauncher =
-            registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
-                // User can cancel subtitle picker -> just play video without external subs
-                playPickedVideoWithOptionalSubtitle(subtitleUri);
-            });
+});
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
