@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.MotionEvent;
 import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -72,14 +73,21 @@ public class WatchActivity extends AppCompatActivity {
         // Tap-to-show controls like original
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
-        playerView.setControllerHideOnTouch(true);
+        playerView.setControllerHideOnTouch(false);   // we handle touch ourselves
         playerView.setControllerShowTimeoutMs(2500);
-        playerView.setOnClickListener(v -> {
-            if (controllerVisible) {
-                playerView.hideController();
-            } else {
-                playerView.showController();
+
+        // Make sure the view receives touch events
+        playerView.setClickable(true);
+        playerView.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (controllerVisible) {
+                    playerView.hideController();
+                } else {
+                    playerView.showController();
+                }
+                return true;
             }
+            return false;
         });
 
         // Immersive flags like original
