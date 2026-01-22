@@ -5,18 +5,15 @@
     android:layout_height="match_parent"
     android:background="#000">
 
-    <!-- Bottom controller (your first screenshot) -->
+    <!-- Bottom controller (your custom layout like 1st screenshot) -->
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:use_controller="true"
-        app:controller_layout_id="@layout/exo_playback_control_view"
-        app:controller_auto_show="false"
-        app:controller_hide_on_touch="false"
-        app:show_timeout="2500" />
+        app:controller_layout_id="@layout/exo_playback_control_view" />
 
-    <!-- Center overlay (styled ExoPlayer UI like second screenshot) -->
+    <!-- Center overlay (styled controller like 2nd screenshot) -->
     <com.google.android.exoplayer2.ui.StyledPlayerControlView
         android:id="@+id/center_overlay_controls"
         android:layout_width="wrap_content"
