@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000">
 
-    <!-- This uses ExoPlayer DEFAULT bottom controller (CC, overflow, settings, etc.) -->
+    <!-- Bottom controller (your first screenshot) -->
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:use_controller="true"
+        app:controller_layout_id="@layout/exo_playback_control_view"
         app:controller_auto_show="false"
         app:controller_hide_on_touch="false"
         app:show_timeout="2500" />
 
-    <!-- Center overlay using ExoPlayer styled control view -->
+    <!-- Center overlay (styled ExoPlayer UI like second screenshot) -->
     <com.google.android.exoplayer2.ui.StyledPlayerControlView
         android:id="@+id/center_overlay_controls"
         android:layout_width="wrap_content"

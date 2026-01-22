@@ -55,12 +55,13 @@ public class WatchActivity extends AppCompatActivity {
         playerView = findViewById(R.id.player_view);
         centerOverlayControls = findViewById(R.id.center_overlay_controls);
 
-        // Full default ExoPlayer controller (CC/overflow/settings etc.)
+        // Bottom controller behavior
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
         playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
+        // Tap video: show bottom + center overlay
         playerView.setOnClickListener(v -> showControls());
 
         initPlayer();
@@ -69,6 +70,7 @@ public class WatchActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         if (!pickerShown) {
             pickerShown = true;
             picker.launch(new String[]{"video/*"});
@@ -80,7 +82,6 @@ public class WatchActivity extends AppCompatActivity {
     private void initPlayer() {
         if (player != null) return;
 
-        // 15s skip behavior (icons are still Exo styled)
         player = new ExoPlayer.Builder(this)
                 .setSeekBackIncrementMs(15_000)
                 .setSeekForwardIncrementMs(15_000)
@@ -92,6 +93,7 @@ public class WatchActivity extends AppCompatActivity {
 
     private void play(Uri uri) {
         if (player == null) initPlayer();
+
         player.setMediaItem(MediaItem.fromUri(uri));
         player.prepare();
         player.play();
@@ -109,6 +111,7 @@ public class WatchActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         uiHandler.removeCallbacks(hideCenterOverlay);
+
         if (player != null) {
             player.release();
             player = null;
