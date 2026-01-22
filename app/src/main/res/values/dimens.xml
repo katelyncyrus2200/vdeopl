@@ -1,7 +1,6 @@
 <resources>
     <dimen name="exo_media_button_width">71dp</dimen>
     <dimen name="exo_media_button_height">52dp</dimen>
-
     <dimen name="exo_icon_horizontal_margin">5dp</dimen>
     <dimen name="exo_small_icon_width">48dp</dimen>
     <dimen name="exo_small_icon_height">48dp</dimen>

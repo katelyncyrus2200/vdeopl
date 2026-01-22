@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,9 +9,10 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:use_controller="true"
+        app:animation_enabled="false"
+        app:auto_show="false"
         app:controller_layout_id="@layout/exo_playback_control_view"
-        app:auto_show="false" />
+        app:show_subtitle_button="true" />
 
     <!-- Center overlay controls (big buttons) -->
     <LinearLayout
@@ -24,34 +24,22 @@
         android:gravity="center"
         android:visibility="gone"
         android:background="#66000000"
-        android:padding="10dp">
+        android:padding="8dp">
 
         <ImageButton
             android:id="@+id/center_rew"
-            android:layout_width="72dp"
-            android:layout_height="56dp"
-            android:layout_margin="8dp"
-            android:background="?android:selectableItemBackground"
-            android:src="@drawable/exo_controls_rewind"
-            android:contentDescription="Rewind" />
+            style="@style/ExoMediaButton.Rewind"
+            android:layout_margin="6dp" />
 
         <ImageButton
             android:id="@+id/center_play_pause"
-            android:layout_width="72dp"
-            android:layout_height="56dp"
-            android:layout_margin="8dp"
-            android:background="?android:selectableItemBackground"
-            android:src="@drawable/exo_controls_play"
-            android:contentDescription="Play/Pause" />
+            style="@style/ExoMediaButton.Pause"
+            android:layout_margin="6dp" />
 
         <ImageButton
             android:id="@+id/center_ffwd"
-            android:layout_width="72dp"
-            android:layout_height="56dp"
-            android:layout_margin="8dp"
-            android:background="?android:selectableItemBackground"
-            android:src="@drawable/exo_controls_fastforward"
-            android:contentDescription="Fast Forward" />
+            style="@style/ExoMediaButton.FastForward"
+            android:layout_margin="6dp" />
 
     </LinearLayout>
 
