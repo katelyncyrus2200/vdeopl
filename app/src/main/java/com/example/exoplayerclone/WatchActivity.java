@@ -29,13 +29,12 @@ public class WatchActivity extends AppCompatActivity {
     private int resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
 
     private boolean videoPickerShown = false;
-
     private @Nullable Uri pickedVideoUri = null;
 
+    // Declare subtitle launcher FIRST to avoid "illegal forward reference"
     private final ActivityResultLauncher<String[]> openSubtitleLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
-                // User can cancel subtitle picker -> just play video without external subs
-                playPickedVideoWithOptionalSubtitle(subtitleUri);
+                playPickedVideoWithOptionalSubtitle(subtitleUri); // cancel => null
             });
 
     private final ActivityResultLauncher<String[]> openVideoLauncher =
@@ -60,7 +59,6 @@ public class WatchActivity extends AppCompatActivity {
                         "application/octet-stream"
                 });
             });
-});
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +66,16 @@ public class WatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_watch);
 
         playerView = findViewById(R.id.player_view);
+
+        // Tap-to-show controls like original
+        playerView.setUseController(true);
+        playerView.setControllerAutoShow(false);
+        playerView.setControllerHideOnTouch(true);
+        playerView.setControllerShowTimeoutMs(2500);
+        playerView.setOnClickListener(v -> {
+            if (playerView.isControllerVisible()) playerView.hideController();
+            else playerView.showController();
+        });
 
         // Immersive flags like original
         playerView.setSystemUiVisibility(0x1307);
@@ -103,7 +111,7 @@ public class WatchActivity extends AppCompatActivity {
             });
         }
 
-        // Audio track button (opens ExoPlayer track selection dialog)
+        // Audio track button
         ImageButton audioBtn = playerView.findViewById(R.id.exo_audio_track);
         if (audioBtn != null) {
             audioBtn.setOnClickListener(v -> {
@@ -123,7 +131,7 @@ public class WatchActivity extends AppCompatActivity {
         super.onStart();
         initPlayerIfNeeded();
 
-        // Auto-open video picker when app starts (once)
+        // Auto picker on first launch
         if (!videoPickerShown) {
             videoPickerShown = true;
             openVideoLauncher.launch(new String[]{"video/*"});
@@ -133,8 +141,8 @@ public class WatchActivity extends AppCompatActivity {
     private void initPlayerIfNeeded() {
         if (player != null) return;
 
+        // Original app uses 10s jumps
         player = new ExoPlayer.Builder(this)
-                // User requested skip buttons like original; set 15 seconds
                 .setSeekForwardIncrementMs(10_000)
                 .setSeekBackIncrementMs(10_000)
                 .build();
@@ -143,10 +151,8 @@ public class WatchActivity extends AppCompatActivity {
     }
 
     private void playPickedVideoWithOptionalSubtitle(@Nullable Uri subtitleUri) {
-        if (pickedVideoUri == null) {
-            // no video picked
-            return;
-        }
+        if (pickedVideoUri == null) return;
+
         initPlayerIfNeeded();
 
         MediaItem mediaItem;
@@ -158,6 +164,7 @@ public class WatchActivity extends AppCompatActivity {
             } catch (SecurityException ignored) {}
 
             String mime = guessSubtitleMimeType(subtitleUri);
+
             MediaItem.SubtitleConfiguration sub =
                     new MediaItem.SubtitleConfiguration.Builder(subtitleUri)
                             .setMimeType(mime)
@@ -182,12 +189,8 @@ public class WatchActivity extends AppCompatActivity {
     private String guessSubtitleMimeType(Uri subtitleUri) {
         String name = subtitleUri.getLastPathSegment();
         if (name != null) name = name.toLowerCase();
-
-        if (name != null && name.endsWith(".vtt")) {
-            return MimeTypes.TEXT_VTT;
-        }
-        // default to SRT
-        return MimeTypes.APPLICATION_SUBRIP;
+        if (name != null && name.endsWith(".vtt")) return MimeTypes.TEXT_VTT;
+        return MimeTypes.APPLICATION_SUBRIP; // default SRT
     }
 
     @Override
