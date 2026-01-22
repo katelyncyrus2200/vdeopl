@@ -13,14 +13,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.text.CaptionStyleCompat;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.StyledPlayerControlView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.exoplayer2.util.Util;
 
 public class WatchActivity extends AppCompatActivity {
 
@@ -62,18 +59,17 @@ public class WatchActivity extends AppCompatActivity {
         playerView = findViewById(R.id.player_view);
         centerOverlayControls = findViewById(R.id.center_overlay_controls);
 
-        // Bottom controller settings
+        // Bottom controller behavior
         playerView.setUseController(true);
         playerView.setControllerAutoShow(false);
         playerView.setControllerHideOnTouch(false);
         playerView.setControllerShowTimeoutMs(2500);
 
-        // Tap video -> show BOTH bottom + center overlay
+        // Tap video: show bottom + center overlay
         playerView.setOnClickListener(v -> showControls());
 
         initPlayer();
         applyCenterOverlayIcons();
-        styleSubtitles();
     }
 
     @Override
@@ -98,42 +94,34 @@ public class WatchActivity extends AppCompatActivity {
                 .setSeekForwardIncrementMs(15_000)
                 .build();
 
-        // Attach player to bottom + center controllers
+        // Attach to both controllers
         playerView.setPlayer(player);
         centerOverlayControls.setPlayer(player);
-
-        // Enable subtitle renderer by default (CC button will work when subtitles exist)
-        trackSelector.setParameters(
-                trackSelector.buildUponParameters()
-                        .setRendererDisabled(C.TRACK_TYPE_TEXT, false)
-        );
     }
 
     private void play(Uri uri) {
         if (player == null) initPlayer();
 
-        MediaItem item = new MediaItem.Builder()
-                .setUri(uri)
-                .build();
-
+        MediaItem item = MediaItem.fromUri(uri);
         player.setMediaItem(item);
         player.prepare();
         player.play();
     }
 
     private void showControls() {
-        // Bottom controller
+        // bottom controller
         playerView.showController();
 
-        // Center overlay
+        // center overlay controller
         centerOverlayControls.setVisibility(View.VISIBLE);
+
         uiHandler.removeCallbacks(hideCenterOverlay);
         uiHandler.postDelayed(hideCenterOverlay, 2500);
     }
 
     /**
-     * Put ExoPlayer styled icons onto the center overlay buttons.
-     * We use ExoPlayer UI resource IDs so there is no "R.drawable not found".
+     * Apply ExoPlayer styled icons to the center overlay buttons.
+     * Using ExoPlayer UI R avoids "R.drawable not found".
      */
     private void applyCenterOverlayIcons() {
         if (centerOverlayControls == null) return;
@@ -150,30 +138,12 @@ public class WatchActivity extends AppCompatActivity {
         if (ffwd != null) ffwd.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_fastforward);
         if (next != null) next.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_styled_controls_next);
 
-        // Make sure icons are visible
+        // Force visible white icons
         if (prev != null) prev.setColorFilter(0xFFFFFFFF);
         if (rew  != null) rew.setColorFilter(0xFFFFFFFF);
         if (play != null) play.setColorFilter(0xFFFFFFFF);
         if (ffwd != null) ffwd.setColorFilter(0xFFFFFFFF);
         if (next != null) next.setColorFilter(0xFFFFFFFF);
-    }
-
-    /** Better subtitle visibility (optional). */
-    private void styleSubtitles() {
-        if (playerView == null) return;
-        playerView.getSubtitleView().setStyle(CaptionStyleCompat.DEFAULT);
-        playerView.getSubtitleView().setFixedTextSize(
-                CaptionStyleCompat.DEFAULT.edgeType == CaptionStyleCompat.EDGE_TYPE_NONE
-                        ? CaptionStyleCompat.DEFAULT.windowColor : CaptionStyleCompat.DEFAULT.windowColor,
-                16
-        );
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // optional pause on background
-        if (player != null) player.pause();
     }
 
     @Override
