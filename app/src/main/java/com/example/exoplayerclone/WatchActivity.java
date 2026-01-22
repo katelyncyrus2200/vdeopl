@@ -4,20 +4,33 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.exoplayer2.ui.TrackSelectionDialogBuilder;
+import com.google.android.exoplayer2.util.MimeTypes;
+
+import java.util.Collections;
 
 public class WatchActivity extends AppCompatActivity {
 
     private StyledPlayerView playerView;
     private ExoPlayer player;
-    private boolean pickerShown = false;
+
+    private int resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
+
+    private boolean videoPickerShown = false;
+
+    private @Nullable Uri pickedVideoUri = null;
 
     private final ActivityResultLauncher<String[]> openVideoLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
@@ -32,7 +45,20 @@ public class WatchActivity extends AppCompatActivity {
                     );
                 } catch (SecurityException ignored) {}
 
-                playUri(uri);
+                pickedVideoUri = uri;
+
+                // After selecting video, ask (optional) subtitle file
+                openSubtitleLauncher.launch(new String[]{
+                        "text/*",
+                        "application/x-subrip",
+                        "application/octet-stream"
+                });
+            });
+
+    private final ActivityResultLauncher<String[]> openSubtitleLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), subtitleUri -> {
+                // User can cancel subtitle picker -> just play video without external subs
+                playPickedVideoWithOptionalSubtitle(subtitleUri);
             });
 
     @Override
@@ -42,10 +68,8 @@ public class WatchActivity extends AppCompatActivity {
 
         playerView = findViewById(R.id.player_view);
 
-        // Same immersive flags used in the original (0x1307)
+        // Immersive flags like original
         playerView.setSystemUiVisibility(0x1307);
-
-        // Re-apply immersive when controller hides
         playerView.setControllerVisibilityListener(new StyledPlayerView.ControllerVisibilityListener() {
             @Override
             public void onVisibilityChanged(int visibility) {
@@ -55,11 +79,57 @@ public class WatchActivity extends AppCompatActivity {
             }
         });
 
+        // Show controls only when the user taps the screen (like the original app)
+        playerView.setUseController(true);
+        playerView.setControllerAutoShow(false);      // don't show automatically
+        playerView.setControllerHideOnTouch(true);    // tap hides when visible
+        playerView.setControllerShowTimeoutMs(2500);  // auto-hide after 2.5s
+
+        playerView.setOnClickListener(v -> {
+            if (playerView.isControllerVisible()) {
+                playerView.hideController();
+            } else {
+                playerView.showController();
+            }
+        });
+
+
         if (savedInstanceState != null) {
-            pickerShown = savedInstanceState.getBoolean("pickerShown", false);
+            videoPickerShown = savedInstanceState.getBoolean("videoPickerShown", false);
+            String savedVideo = savedInstanceState.getString("pickedVideoUri", null);
+            if (savedVideo != null) pickedVideoUri = Uri.parse(savedVideo);
         }
 
         initPlayerIfNeeded();
+
+        // Aspect ratio toggle
+        ImageButton aspectBtn = playerView.findViewById(R.id.exo_aspect_ratio);
+        if (aspectBtn != null) {
+            aspectBtn.setOnClickListener(v -> {
+                if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT)
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM;
+                else if (resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL;
+                else
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
+
+                playerView.setResizeMode(resizeMode);
+            });
+        }
+
+        // Audio track button (opens ExoPlayer track selection dialog)
+        ImageButton audioBtn = playerView.findViewById(R.id.exo_audio_track);
+        if (audioBtn != null) {
+            audioBtn.setOnClickListener(v -> {
+                if (player == null) return;
+                new TrackSelectionDialogBuilder(
+                        WatchActivity.this,
+                        "Audio",
+                        player,
+                        C.TRACK_TYPE_AUDIO
+                ).build().show();
+            });
+        }
     }
 
     @Override
@@ -67,8 +137,9 @@ public class WatchActivity extends AppCompatActivity {
         super.onStart();
         initPlayerIfNeeded();
 
-        if (!pickerShown) {
-            pickerShown = true;
+        // Auto-open video picker when app starts (once)
+        if (!videoPickerShown) {
+            videoPickerShown = true;
             openVideoLauncher.launch(new String[]{"video/*"});
         }
     }
@@ -77,24 +148,66 @@ public class WatchActivity extends AppCompatActivity {
         if (player != null) return;
 
         player = new ExoPlayer.Builder(this)
-                .setSeekForwardIncrementMs(10_000)
-                .setSeekBackIncrementMs(10_000)
+                // User requested skip buttons like original; set 15 seconds
+                .setSeekForwardIncrementMs(15_000)
+                .setSeekBackIncrementMs(15_000)
                 .build();
 
         playerView.setPlayer(player);
     }
 
-    private void playUri(Uri uri) {
-        if (player == null) initPlayerIfNeeded();
-        MediaItem item = new MediaItem.Builder().setUri(uri).build();
-        player.setMediaItem(item);
+    private void playPickedVideoWithOptionalSubtitle(@Nullable Uri subtitleUri) {
+        if (pickedVideoUri == null) {
+            // no video picked
+            return;
+        }
+        initPlayerIfNeeded();
+
+        MediaItem mediaItem;
+        if (subtitleUri != null) {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        subtitleUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException ignored) {}
+
+            String mime = guessSubtitleMimeType(subtitleUri);
+            MediaItem.SubtitleConfiguration sub =
+                    new MediaItem.SubtitleConfiguration.Builder(subtitleUri)
+                            .setMimeType(mime)
+                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                            .build();
+
+            mediaItem = new MediaItem.Builder()
+                    .setUri(pickedVideoUri)
+                    .setSubtitleConfigurations(Collections.singletonList(sub))
+                    .build();
+        } else {
+            mediaItem = new MediaItem.Builder()
+                    .setUri(pickedVideoUri)
+                    .build();
+        }
+
+        player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
     }
 
+    private String guessSubtitleMimeType(Uri subtitleUri) {
+        String name = subtitleUri.getLastPathSegment();
+        if (name != null) name = name.toLowerCase();
+
+        if (name != null && name.endsWith(".vtt")) {
+            return MimeTypes.TEXT_VTT;
+        }
+        // default to SRT
+        return MimeTypes.APPLICATION_SUBRIP;
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("pickerShown", pickerShown);
+        outState.putBoolean("videoPickerShown", videoPickerShown);
+        if (pickedVideoUri != null) outState.putString("pickedVideoUri", pickedVideoUri.toString());
         super.onSaveInstanceState(outState);
     }
 

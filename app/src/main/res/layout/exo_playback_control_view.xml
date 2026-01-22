@@ -44,7 +44,7 @@
             style="@style/ExoStyledControls.Button.Bottom.CC" />
 
         <ImageButton
-            android:id="@id/exo_audio_track"
+            android:id="@+id/exo_audio_track"
             android:layout_margin="4dp"
             android:src="@drawable/baseline_language_24"
             android:contentDescription="@string/exo_controls_audio_description"
